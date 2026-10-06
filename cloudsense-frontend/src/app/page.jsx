@@ -18,7 +18,7 @@ export default function RootPage() {
   }, [router]);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center">
       <LoadingSpinner size="lg" text="Loading CloudSense..." />
     </div>
   );

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Target, Edit2, Trash2, AlertTriangle, ShieldCheck, DollarSign } from 'lucide-react';
+import { Target, Edit2, Trash2 } from 'lucide-react';
 import BudgetProgressBar from './BudgetProgressBar';
 import ConfirmDialog from '../ui/ConfirmDialog';
 import { formatCurrency, formatDate } from '../../lib/utils';
@@ -30,21 +30,21 @@ export default function BudgetCard({ budget, status, onEdit, onDelete }) {
   };
 
   return (
-    <div className="rounded-xl border border-[#222222] bg-[#111111] p-5 space-y-4 hover:border-zinc-700/60 transition-all">
+    <div className="rounded-xl border border-slate-200 bg-white p-5 space-y-4 shadow-sm hover:border-slate-300 transition-all">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <div
             className={`w-9 h-9 rounded-lg border flex items-center justify-center shrink-0 ${
               isOverall
-                ? 'bg-blue-500/10 border-blue-500/20 text-blue-400'
-                : 'bg-cyan-500/10 border-cyan-500/20 text-cyan-400'
+                ? 'bg-blue-50 border-blue-200 text-blue-600'
+                : 'bg-cyan-50 border-cyan-200 text-cyan-600'
             }`}
           >
             <Target className="w-4 h-4" />
           </div>
           <div>
-            <h4 className="text-sm font-semibold text-zinc-100">{label}</h4>
-            <p className="text-xs text-zinc-400">
+            <h4 className="text-sm font-semibold text-slate-900">{label}</h4>
+            <p className="text-xs text-slate-500">
               {isOverall ? 'Total cloud spend limit' : `Service: ${budget.service}`}
             </p>
           </div>
@@ -54,15 +54,15 @@ export default function BudgetCard({ budget, status, onEdit, onDelete }) {
         <span
           className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border ${
             isBreached
-              ? 'border-red-500/30 bg-red-950/40 text-red-400'
+              ? 'border-red-200 bg-red-50 text-red-600'
               : isNearBreached
-              ? 'border-amber-500/30 bg-amber-950/40 text-amber-400'
-              : 'border-green-500/30 bg-green-950/40 text-green-400'
+              ? 'border-amber-200 bg-amber-50 text-amber-700'
+              : 'border-emerald-200 bg-emerald-50 text-emerald-700'
           }`}
         >
           <span
             className={`w-1.5 h-1.5 rounded-full ${
-              isBreached ? 'bg-red-400' : isNearBreached ? 'bg-amber-400' : 'bg-green-400'
+              isBreached ? 'bg-red-500' : isNearBreached ? 'bg-amber-500' : 'bg-emerald-500'
             }`}
           />
           {isBreached ? 'Exceeded' : isNearBreached ? 'Near Limit' : 'Healthy'}
@@ -72,14 +72,14 @@ export default function BudgetCard({ budget, status, onEdit, onDelete }) {
       {/* Spend vs Limit */}
       <div className="flex items-baseline justify-between">
         <div>
-          <span className="text-xs text-zinc-400">Current Spend: </span>
-          <span className="font-mono text-lg font-bold text-zinc-100">
+          <span className="text-xs text-slate-500">Current Spend: </span>
+          <span className="font-mono text-lg font-bold text-slate-900">
             {formatCurrency(currentSpend)}
           </span>
         </div>
         <div className="text-right">
-          <span className="text-xs text-zinc-400">Cap: </span>
-          <span className="font-mono text-sm font-semibold text-zinc-300">
+          <span className="text-xs text-slate-500">Cap: </span>
+          <span className="font-mono text-sm font-semibold text-slate-700">
             {formatCurrency(budget.monthlyLimit)}
           </span>
         </div>
@@ -92,7 +92,7 @@ export default function BudgetCard({ budget, status, onEdit, onDelete }) {
         alertAtPercent={budget.alertAtPercent}
       />
 
-      <div className="flex items-center justify-between text-xs text-zinc-400 pt-1 border-t border-[#222222]">
+      <div className="flex items-center justify-between text-xs text-slate-400 pt-1 border-t border-slate-100">
         <span>Alert threshold: {budget.alertAtPercent}%</span>
         <span>Created {formatDate(budget.createdAt)}</span>
       </div>
@@ -102,16 +102,16 @@ export default function BudgetCard({ budget, status, onEdit, onDelete }) {
         <button
           type="button"
           onClick={() => onEdit(budget)}
-          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#222222] bg-zinc-900 hover:bg-zinc-800 text-xs font-medium text-zinc-300 transition-colors"
+          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-medium text-slate-700 shadow-sm transition-colors"
         >
-          <Edit2 className="w-3.5 h-3.5" />
+          <Edit2 className="w-3.5 h-3.5 text-slate-500" />
           <span>Edit</span>
         </button>
 
         <button
           type="button"
           onClick={() => setShowDeleteModal(true)}
-          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-red-400 hover:text-red-300 hover:bg-red-950/20 transition-colors"
+          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
         >
           <Trash2 className="w-3.5 h-3.5" />
           <span>Delete</span>

@@ -7,17 +7,17 @@ export default function AlertStatusBadge({ status, className }) {
 
   const styles = {
     sent: {
-      color: 'border-blue-500/30 bg-blue-950/40 text-blue-400',
+      color: 'border-blue-200 bg-blue-50 text-blue-700',
       icon: PhoneCall,
       label: 'Sent',
     },
     acknowledged: {
-      color: 'border-green-500/30 bg-green-950/40 text-green-400',
+      color: 'border-emerald-200 bg-emerald-50 text-emerald-700',
       icon: CheckCircle2,
       label: 'Acknowledged',
     },
     failed: {
-      color: 'border-red-500/30 bg-red-950/40 text-red-400',
+      color: 'border-red-200 bg-red-50 text-red-700',
       icon: XCircle,
       label: 'Failed',
     },

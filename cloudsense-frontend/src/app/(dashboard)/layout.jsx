@@ -27,7 +27,6 @@ export default function DashboardLayout({ children }) {
 
       try {
         await getMe();
-        // Fetch active connection if needed
         if (!activeConnection) {
           const res = await api.get('/aws/connections');
           if (isMounted && res.success && Array.isArray(res.data)) {
@@ -52,14 +51,14 @@ export default function DashboardLayout({ children }) {
 
   if (checkingAuth) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <LoadingSpinner size="lg" text="Authenticating CloudSense session..." />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex">
+    <div className="min-h-screen bg-slate-50 flex">
       {/* Fixed Sidebar for desktop */}
       <Sidebar />
 

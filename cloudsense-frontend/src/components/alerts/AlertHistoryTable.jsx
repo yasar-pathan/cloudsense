@@ -5,8 +5,6 @@ import {
   DollarSign,
   AlertTriangle,
   PhoneCall,
-  ChevronDown,
-  ChevronUp,
   CheckCircle2,
   Bell,
 } from 'lucide-react';
@@ -34,11 +32,11 @@ export default function AlertHistoryTable({ alerts = [], onAcknowledge, loading 
 
   if (loading) {
     return (
-      <div className="rounded-xl border border-[#222222] bg-[#111111] p-6 space-y-4 animate-pulse">
-        <div className="h-5 w-40 bg-zinc-800 rounded" />
+      <div className="rounded-xl border border-slate-200 bg-white p-6 space-y-4 animate-pulse shadow-sm">
+        <div className="h-4 w-40 bg-slate-100 rounded" />
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-14 w-full bg-zinc-800/40 rounded-lg" />
+            <div key={i} className="h-12 w-full bg-slate-50 rounded-lg" />
           ))}
         </div>
       </div>
@@ -56,12 +54,12 @@ export default function AlertHistoryTable({ alerts = [], onAcknowledge, loading 
   }
 
   return (
-    <div className="rounded-xl border border-[#222222] bg-[#111111] overflow-hidden">
+    <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
       {/* Desktop Table View */}
       <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-left text-xs">
           <thead>
-            <tr className="border-b border-[#222222] bg-zinc-950/60 text-zinc-400 font-medium select-none">
+            <tr className="border-b border-slate-200 bg-slate-50 text-slate-500 font-medium select-none">
               <th className="py-3 px-4">Alert Type</th>
               <th className="py-3 px-4">Message Preview</th>
               <th className="py-3 px-4">Channel</th>
@@ -71,7 +69,7 @@ export default function AlertHistoryTable({ alerts = [], onAcknowledge, loading 
               <th className="py-3 px-4 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#222222] text-zinc-300">
+          <tbody className="divide-y divide-slate-100 text-slate-700">
             {alerts.map((item) => {
               const isBreach = item.type === 'budget_breach';
               const isExpanded = expandedAlert === item._id;
@@ -80,15 +78,15 @@ export default function AlertHistoryTable({ alerts = [], onAcknowledge, loading 
                 <React.Fragment key={item._id}>
                   <tr
                     onClick={() => toggleExpand(item._id)}
-                    className="hover:bg-zinc-900/50 cursor-pointer transition-colors group"
+                    className="hover:bg-slate-50/70 cursor-pointer transition-colors group"
                   >
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-2 font-medium">
                         <div
                           className={`w-6 h-6 rounded flex items-center justify-center shrink-0 ${
                             isBreach
-                              ? 'bg-amber-500/10 text-amber-400'
-                              : 'bg-red-500/10 text-red-400'
+                              ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                              : 'bg-red-50 text-red-600 border border-red-200'
                           }`}
                         >
                           {isBreach ? (
@@ -97,19 +95,19 @@ export default function AlertHistoryTable({ alerts = [], onAcknowledge, loading 
                             <AlertTriangle className="w-3.5 h-3.5" />
                           )}
                         </div>
-                        <span className="capitalize">
+                        <span className="capitalize text-slate-800">
                           {item.type ? item.type.replace('_', ' ') : 'Alert'}
                         </span>
                       </div>
                     </td>
 
-                    <td className="py-3.5 px-4 max-w-xs truncate text-zinc-400">
+                    <td className="py-3.5 px-4 max-w-xs truncate text-slate-500">
                       {item.message}
                     </td>
 
-                    <td className="py-3.5 px-4 font-mono text-[11px] text-zinc-400">
-                      <span className="inline-flex items-center gap-1">
-                        <PhoneCall className="w-3 h-3 text-blue-400" />
+                    <td className="py-3.5 px-4 font-mono text-[11px] text-slate-500">
+                      <span className="inline-flex items-center gap-1.5">
+                        <PhoneCall className="w-3 h-3 text-blue-600" />
                         <span>Voice Call</span>
                       </span>
                     </td>
@@ -118,11 +116,11 @@ export default function AlertHistoryTable({ alerts = [], onAcknowledge, loading 
                       <AlertStatusBadge status={item.status} />
                     </td>
 
-                    <td className="py-3.5 px-4 text-zinc-400 font-mono text-[11px]">
+                    <td className="py-3.5 px-4 text-slate-500 font-mono text-[11px]">
                       {formatDateTime(item.sentAt || item.createdAt)}
                     </td>
 
-                    <td className="py-3.5 px-4 text-zinc-400 font-mono text-[11px]">
+                    <td className="py-3.5 px-4 text-slate-500 font-mono text-[11px]">
                       {item.acknowledgedAt ? formatDateTime(item.acknowledgedAt) : '—'}
                     </td>
 
@@ -132,9 +130,9 @@ export default function AlertHistoryTable({ alerts = [], onAcknowledge, loading 
                           type="button"
                           disabled={ackLoading === item._id}
                           onClick={(e) => handleAcknowledge(e, item._id)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-xs font-medium text-zinc-200 transition-colors disabled:opacity-50"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-medium text-slate-700 shadow-sm transition-colors disabled:opacity-50"
                         >
-                          <CheckCircle2 className="w-3 h-3 text-green-400" />
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                           <span>Acknowledge</span>
                         </button>
                       )}
@@ -143,17 +141,17 @@ export default function AlertHistoryTable({ alerts = [], onAcknowledge, loading 
 
                   {/* Expanded Message Box */}
                   {isExpanded && (
-                    <tr className="bg-[#0c0c0c]">
-                      <td colSpan={7} className="p-4 border-t border-[#222222]">
+                    <tr className="bg-slate-50/50">
+                      <td colSpan={7} className="p-4 border-t border-slate-200">
                         <div className="space-y-2">
-                          <p className="text-xs font-semibold text-zinc-300">
+                          <p className="text-xs font-semibold text-slate-700">
                             Full Spoken TwiML Message
                           </p>
-                          <p className="p-3 rounded-lg border border-[#222222] bg-zinc-950 font-sans text-xs text-zinc-300 leading-relaxed">
+                          <p className="p-3 rounded-lg border border-slate-200 bg-white font-sans text-xs text-slate-700 leading-relaxed shadow-sm">
                             {item.message}
                           </p>
                           {item.twilioCallSid && (
-                            <p className="text-[11px] font-mono text-zinc-500">
+                            <p className="text-[11px] font-mono text-slate-400">
                               Twilio Call SID: {item.twilioCallSid}
                             </p>
                           )}
@@ -169,27 +167,27 @@ export default function AlertHistoryTable({ alerts = [], onAcknowledge, loading 
       </div>
 
       {/* Mobile Cards View */}
-      <div className="md:hidden divide-y divide-[#222222]">
+      <div className="md:hidden divide-y divide-slate-100">
         {alerts.map((item) => (
           <div key={item._id} className="p-4 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-zinc-200 capitalize">
+                <span className="text-xs font-semibold text-slate-800 capitalize">
                   {item.type?.replace('_', ' ')}
                 </span>
               </div>
               <AlertStatusBadge status={item.status} />
             </div>
 
-            <p className="text-xs text-zinc-300 leading-relaxed">{item.message}</p>
+            <p className="text-xs text-slate-600 leading-relaxed">{item.message}</p>
 
-            <div className="flex items-center justify-between text-[11px] text-zinc-400 pt-1">
+            <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1">
               <span>{formatDateTime(item.sentAt || item.createdAt)}</span>
               {item.status === 'sent' && (
                 <button
                   type="button"
                   onClick={(e) => handleAcknowledge(e, item._id)}
-                  className="px-2.5 py-1 rounded bg-zinc-800 text-xs font-medium text-zinc-200"
+                  className="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-xs font-medium text-slate-800"
                 >
                   Acknowledge
                 </button>

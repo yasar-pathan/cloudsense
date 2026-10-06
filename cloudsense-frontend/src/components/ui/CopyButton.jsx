@@ -24,12 +24,12 @@ export default function CopyButton({ text, className }) {
       onClick={handleCopy}
       aria-label="Copy to clipboard"
       className={cn(
-        'inline-flex items-center justify-center p-1.5 rounded-md text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors',
-        copied && 'text-green-400 hover:text-green-300',
+        'inline-flex items-center justify-center p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors',
+        copied && 'text-emerald-600 hover:text-emerald-700',
         className
       )}
     >
-      {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+      {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
     </button>
   );
 }

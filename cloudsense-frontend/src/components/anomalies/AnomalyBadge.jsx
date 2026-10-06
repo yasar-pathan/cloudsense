@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertOctagon, AlertTriangle, AlertCircle, Info } from 'lucide-react';
+import { AlertCircle, AlertTriangle, Info } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 export default function AnomalyBadge({ severity, className, showIcon = true }) {
@@ -7,22 +7,22 @@ export default function AnomalyBadge({ severity, className, showIcon = true }) {
 
   const styles = {
     critical: {
-      color: 'bg-red-950/60 text-red-400 border-red-800/80',
-      icon: AlertOctagon,
+      color: 'bg-red-50 text-red-600 border-red-200',
+      icon: AlertCircle,
       label: 'Critical',
     },
     high: {
-      color: 'bg-orange-950/60 text-orange-400 border-orange-800/80',
+      color: 'bg-orange-50 text-orange-600 border-orange-200',
       icon: AlertTriangle,
       label: 'High',
     },
     medium: {
-      color: 'bg-amber-950/60 text-amber-400 border-amber-800/80',
-      icon: AlertCircle,
+      color: 'bg-amber-50 text-amber-700 border-amber-200',
+      icon: AlertTriangle,
       label: 'Medium',
     },
     low: {
-      color: 'bg-blue-950/60 text-blue-400 border-blue-800/80',
+      color: 'bg-blue-50 text-blue-700 border-blue-200',
       icon: Info,
       label: 'Low',
     },
@@ -34,12 +34,12 @@ export default function AnomalyBadge({ severity, className, showIcon = true }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border uppercase tracking-wider',
+        'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-medium border capitalize',
         current.color,
         className
       )}
     >
-      {showIcon && <Icon className="w-3 h-3 shrink-0" />}
+      {showIcon && <Icon className="w-3.5 h-3.5 shrink-0" />}
       <span>{current.label}</span>
     </span>
   );

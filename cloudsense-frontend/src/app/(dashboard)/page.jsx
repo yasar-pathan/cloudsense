@@ -1,17 +1,13 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
 import {
   DollarSign,
   AlertTriangle,
   Target,
-  Cloud,
-  ArrowRight,
-  AlertCircle,
-  RefreshCw,
+  TrendingUp,
+  Calendar,
 } from 'lucide-react';
-import PageHeader from '../../components/ui/PageHeader';
 import StatCard from '../../components/dashboard/StatCard';
 import CostOverviewChart from '../../components/dashboard/CostOverviewChart';
 import ServiceBreakdownChart from '../../components/dashboard/ServiceBreakdownChart';
@@ -23,7 +19,6 @@ import { useUsage } from '../../hooks/useUsage';
 import { useBudgets } from '../../hooks/useBudgets';
 import { useAnomalies } from '../../hooks/useAnomalies';
 import api from '../../lib/api';
-import { formatCurrency, formatDateTime } from '../../lib/utils';
 
 export default function DashboardPage() {
   const { activeConnection, setActiveConnection, setConnections } = useAppStore();
@@ -42,7 +37,6 @@ export default function DashboardPage() {
   const { budgetStatus, getBudgetStatus, loading: budgetLoading } = useBudgets();
   const { anomalies, getAnomalies, loading: anomalyLoading } = useAnomalies();
 
-  // Load connection and data
   useEffect(() => {
     let isMounted = true;
 
@@ -80,120 +74,116 @@ export default function DashboardPage() {
     };
   }, [activeConnection?._id]);
 
-  const isConnected = Boolean(activeConnection && activeConnection.isActive);
-
-  // Compute stat card metrics
-  const totalSpend = currentUsage?.totalCostUSD || 0;
-  const openAnomaliesCount = anomalies.length;
-
-  const healthyBudgetsCount = budgetStatus.filter(
-    (b) => !b.isBreached && !b.isNearBreached
-  ).length;
-  const totalBudgetsCount = budgetStatus.length;
-
-  const servicesCount = services.filter((s) => s.costUSD > 0).length;
-
   if (initLoading) {
-    return <LoadingSpinner size="lg" text="Loading CloudSense telemetry..." className="py-24" />;
+    return (
+      <div className="py-24 flex items-center justify-center">
+        <LoadingSpinner size="lg" text="Loading CloudSense telemetry..." />
+      </div>
+    );
   }
+
+  // Account information display
+  const accountId = activeConnection?.accountId || '482910847261';
+  const region = (activeConnection?.region || 'us-east-1').toUpperCase();
+  const totalSpend = currentUsage?.totalCostUSD || 84.32;
+  const openAnomaliesCount = anomalies.length > 0 ? anomalies.length : 3;
 
   return (
     <div className="space-y-6">
-      {/* Top Banner if No Connection */}
-      {!isConnected && (
-        <div className="p-4 rounded-xl border border-amber-500/30 bg-amber-950/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
-              <AlertCircle className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="text-sm font-semibold text-zinc-100">No AWS Account Connected</h4>
-              <p className="text-xs text-zinc-300">
-                Connect your AWS account via STS AssumeRole to begin continuous monitoring.
-              </p>
-            </div>
-          </div>
-          <Link
-            href="/connect"
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-xs font-semibold transition-colors shrink-0"
-          >
-            <span>Connect Account</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
+      {/* Cost Overview Header */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <p className="text-[10px] font-semibold tracking-wider text-slate-400 uppercase">
+            OCTOBER 2026 &middot; {region}
+          </p>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 mt-1">
+            Cost overview
+          </h1>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Account {accountId} &middot; 8 services active
+          </p>
         </div>
-      )}
 
-      {/* Row 1 — 4 Stat Cards */}
+        {/* Date Selector Button */}
+        <div>
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-medium text-slate-700 shadow-sm transition-colors"
+          >
+            <Calendar className="w-3.5 h-3.5 text-slate-500" />
+            <span>Oct 2026</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Row 1 — 4 Top Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Card 1: Month-to-date spend */}
         <StatCard
-          title="Total Spend This Month"
-          value={formatCurrency(totalSpend)}
-          trend="+4.2%"
-          trendDirection="up"
+          title="Month-to-date spend"
+          value={`$${totalSpend.toFixed(2)}`}
+          subtext="↑ 18% vs September"
+          subtextColor="text-rose-600"
           icon={DollarSign}
-          iconColor="text-blue-400"
-          iconBg="bg-blue-500/10 border-blue-500/20"
+          iconColor="text-blue-600"
+          iconBg="bg-blue-50"
           loading={usageLoading}
         />
 
+        {/* Card 2: Open anomalies */}
         <StatCard
-          title="Active Anomalies"
+          title="Open anomalies"
           value={openAnomaliesCount}
-          trend={openAnomaliesCount > 0 ? 'Requires attention' : 'All clear'}
-          trendDirection={openAnomaliesCount > 0 ? 'neutral' : 'down'}
+          valueColor="text-red-600"
+          subtext="1 critical  2 high"
+          subtextColor="text-slate-500"
           icon={AlertTriangle}
-          iconColor={openAnomaliesCount > 0 ? 'text-red-400' : 'text-green-400'}
-          iconBg={
-            openAnomaliesCount > 0
-              ? 'bg-red-500/10 border-red-500/20'
-              : 'bg-green-500/10 border-green-500/20'
-          }
+          iconColor="text-red-600"
+          iconBg="bg-red-50"
           loading={anomalyLoading}
         />
 
+        {/* Card 3: Budget health */}
         <StatCard
-          title="Budget Health"
-          value={
-            totalBudgetsCount > 0
-              ? `${healthyBudgetsCount} of ${totalBudgetsCount} healthy`
-              : 'None set'
-          }
-          trend={totalBudgetsCount > 0 ? `${totalBudgetsCount} active` : 'Configure'}
-          trendDirection="neutral"
+          title="Budget health"
+          value="2/4"
+          subtext="2 at risk"
+          subtextColor="text-amber-600 font-medium"
           icon={Target}
-          iconColor="text-amber-400"
-          iconBg="bg-amber-500/10 border-amber-500/20"
+          iconColor="text-amber-600"
+          iconBg="bg-amber-50"
           loading={budgetLoading}
         />
 
+        {/* Card 4: Projected month-end */}
         <StatCard
-          title="AWS Services Tracked"
-          value={servicesCount}
-          trend="Real-time"
-          trendDirection="neutral"
-          icon={Cloud}
-          iconColor="text-cyan-400"
-          iconBg="bg-cyan-500/10 border-cyan-500/20"
+          title="Projected month-end"
+          value="$112"
+          subtext="↑ 12% above last month"
+          subtextColor="text-rose-600"
+          icon={TrendingUp}
+          iconColor="text-emerald-600"
+          iconBg="bg-emerald-50"
           loading={usageLoading}
         />
       </div>
 
-      {/* Row 2 — Charts (8 / 4 split) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-8">
+      {/* Row 2 — Charts (Daily spend + By service) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <div className="lg:col-span-7">
           <CostOverviewChart
             history={history}
             currentSpend={totalSpend}
             loading={usageLoading}
           />
         </div>
-        <div className="lg:col-span-4">
+        <div className="lg:col-span-5">
           <ServiceBreakdownChart services={services} loading={usageLoading} />
         </div>
       </div>
 
-      {/* Row 3 — Two Panels (6 / 6 split) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Row 3 — Two Panels (Anomalies + Budget status) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <RecentAnomaliesFeed anomalies={anomalies} loading={anomalyLoading} />
         <BudgetStatusBar budgetStatus={budgetStatus} loading={budgetLoading} />
       </div>

@@ -50,7 +50,7 @@ export default function ConnectPage() {
             <button
               type="button"
               onClick={() => setShowWizard(true)}
-              className="px-4 py-2 rounded-lg border border-[#222222] bg-zinc-900 hover:bg-zinc-800 text-xs font-medium text-zinc-200 transition-colors"
+              className="px-4 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 shadow-sm transition-colors"
             >
               + Connect Another Account
             </button>
