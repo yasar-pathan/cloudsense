@@ -66,9 +66,11 @@ export default function RegisterPage() {
       {/* Left panel - Branding */}
       <div className="hidden lg:flex flex-col justify-between w-1/2 p-12 bg-white border-r border-slate-200">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-sm">
-            <Cloud className="w-6 h-6" />
-          </div>
+          <img
+            src="/cloudsense_favicon_hd.png"
+            alt="CloudSense Logo"
+            className="w-10 h-10 rounded-xl shadow-sm object-contain"
+          />
           <span className="text-xl font-bold tracking-tight text-slate-900">
             CloudSense
           </span>
@@ -134,9 +136,11 @@ export default function RegisterPage() {
         <div className="w-full max-w-md space-y-6 bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
           {/* Mobile brand header */}
           <div className="lg:hidden flex items-center gap-2.5 mb-6">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-sm">
-              <Cloud className="w-5 h-5" />
-            </div>
+            <img
+              src="/cloudsense_favicon_hd.png"
+              alt="CloudSense Logo"
+              className="w-8 h-8 rounded-lg shadow-sm object-contain"
+            />
             <span className="text-lg font-bold tracking-tight text-slate-900">
               CloudSense
             </span>

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   RefreshCw,
@@ -72,6 +73,14 @@ export default function Topbar() {
     <header className="h-14 border-b border-slate-200 bg-white/95 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between px-6 md:px-8">
       {/* Left: Tab Title & Status Badges */}
       <div className="flex items-center gap-3">
+        {/* Mobile brand logo (visible only when sidebar is hidden) */}
+        <Link href="/dashboard" className="flex md:hidden items-center mr-1">
+          <img
+            src="/cloudsense_favicon_hd.png"
+            alt="CloudSense Logo"
+            className="w-7 h-7 rounded-lg shadow-sm object-contain"
+          />
+        </Link>
         <h2 className="text-sm font-semibold text-slate-800">
           {getPageTitle(pathname)}
         </h2>

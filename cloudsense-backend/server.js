@@ -1,6 +1,8 @@
+require('./instrument');
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 const express = require('express');
+const Sentry = require('@sentry/node');
 const helmet = require('helmet');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
@@ -63,12 +65,20 @@ app.get('/health', (req, res) => {
   res.json({ success: true, data: { status: 'ok', timestamp: new Date().toISOString() } });
 });
 
+// Sentry verification endpoint
+app.get('/debug-sentry', function mainHandler(req, res) {
+  throw new Error('My first Sentry error!');
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/aws', awsRoutes);
 app.use('/api/budgets', budgetRoutes);
 app.use('/api/usage', usageRoutes);
 app.use('/api/anomalies', anomalyRoutes);
 app.use('/api/alerts', alertRoutes);
+
+// Sentry Express error handler must be registered before custom error middleware
+Sentry.setupExpressErrorHandler(app);
 
 app.use(errorHandler);
 
