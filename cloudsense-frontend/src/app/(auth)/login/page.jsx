@@ -8,6 +8,7 @@ import * as z from 'zod';
 import { Eye, EyeOff, Cloud, ShieldCheck, Zap, PhoneCall, Loader2 } from 'lucide-react';
 import { useAuth } from '../../../hooks/useAuth';
 import ErrorBanner from '../../../components/ui/ErrorBanner';
+import GoogleSignInButton from '../../../components/ui/GoogleSignInButton';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -17,8 +18,19 @@ const loginSchema = z.object({
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const { login, loading, error: authError } = useAuth();
+  const { login, googleLogin, loading, error: authError } = useAuth();
   const [submitError, setSubmitError] = useState(null);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  const handleGoogleSuccess = async (credential) => {
+    setSubmitError(null);
+    setGoogleLoading(true);
+    const result = await googleLogin(credential);
+    if (!result.success) {
+      setSubmitError(result.error);
+    }
+    setGoogleLoading(false);
+  };
 
   const {
     register,
@@ -203,6 +215,29 @@ export default function LoginPage() {
               <span>{loading ? 'Signing in...' : 'Sign in to CloudSense'}</span>
             </button>
           </form>
+
+          {/* Divider */}
+          <div className="relative flex items-center gap-4 py-1">
+            <div className="flex-1 h-px bg-slate-200"></div>
+            <span className="text-[11px] text-slate-400 uppercase tracking-wider font-medium">or</span>
+            <div className="flex-1 h-px bg-slate-200"></div>
+          </div>
+
+          {/* Google Sign-In */}
+          <div className="relative">
+            {googleLoading && (
+              <div className="absolute inset-0 bg-white/60 rounded-lg flex items-center justify-center z-10">
+                <div className="flex items-center gap-2 text-xs text-slate-500">
+                  <div className="w-4 h-4 border-2 border-slate-300 border-t-blue-600 rounded-full animate-spin"></div>
+                  Signing in...
+                </div>
+              </div>
+            )}
+            <GoogleSignInButton
+              onSuccess={handleGoogleSuccess}
+              onError={(msg) => setSubmitError(msg)}
+            />
+          </div>
 
           <div className="pt-4 border-t border-slate-100 text-center">
             <p className="text-xs text-slate-500">

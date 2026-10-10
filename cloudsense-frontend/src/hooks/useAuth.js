@@ -56,6 +56,28 @@ export function useAuth() {
     }
   };
 
+  const googleLogin = async (credential) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await api.post('/auth/google', { credential });
+      if (res.success && res.data?.token) {
+        setToken(res.data.token);
+        setUser(res.data.user);
+        document.cookie = `cs_token=${res.data.token}; path=/; max-age=604800; SameSite=Lax`;
+        router.push(res.data.isNewUser ? '/connect' : '/dashboard');
+        return { success: true };
+      }
+      throw new Error(res.message || 'Google sign-in failed');
+    } catch (err) {
+      const msg = err.response?.data?.message || err.message || 'Google sign-in failed';
+      setError(msg);
+      return { success: false, error: msg };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const logout = useCallback(() => {
     clearAuth();
     document.cookie = 'cs_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
@@ -87,6 +109,7 @@ export function useAuth() {
     error,
     login,
     register,
+    googleLogin,
     logout,
     getMe,
     isAuthenticated,
