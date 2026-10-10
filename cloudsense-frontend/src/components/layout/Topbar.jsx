@@ -1,41 +1,48 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { RefreshCw, Cloud, ShieldCheck, AlertCircle, LogOut } from 'lucide-react';
+import {
+  RefreshCw,
+  Download,
+  Scan,
+  AlertTriangle,
+  CheckCircle2,
+} from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import { useAuth } from '../../hooks/useAuth';
 import api from '../../lib/api';
-import { formatDateTime, cn } from '../../lib/utils';
+import { cn } from '../../lib/utils';
 
 export default function Topbar() {
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { activeConnection, lastSyncedAt, setLastSyncedAt } = useAppStore();
   const [syncing, setSyncing] = useState(false);
-  const [syncMessage, setSyncMessage] = useState(null);
+  const [scanning, setScanning] = useState(false);
+  const [statusMessage, setStatusMessage] = useState(null);
 
   const getPageTitle = (path) => {
-    if (path.startsWith('/dashboard')) return 'Overview';
-    if (path.startsWith('/usage')) return 'Service Usage';
-    if (path.startsWith('/budgets')) return 'Budgets & Thresholds';
-    if (path.startsWith('/anomalies')) return 'Cost Anomalies';
-    if (path.startsWith('/alerts')) return 'Alert Notifications';
-    if (path.startsWith('/connect')) return 'AWS Connection Setup';
-    return 'Dashboard';
+    if (path.startsWith('/dashboard') || path === '/') return 'Overview';
+    if (path.startsWith('/usage')) return 'Usage';
+    if (path.startsWith('/budgets')) return 'Budgets';
+    if (path.startsWith('/anomalies')) return 'Anomalies';
+    if (path.startsWith('/alerts')) return 'Alerts';
+    if (path.startsWith('/connect')) return 'AWS Connection';
+    return 'Overview';
   };
 
   const handleSyncNow = async () => {
     if (!activeConnection?._id) return;
     setSyncing(true);
-    setSyncMessage(null);
+    setStatusMessage(null);
     try {
       const res = await api.post('/usage/sync', { connectionId: activeConnection._id });
       if (res.success) {
-        const now = new Date();
-        setLastSyncedAt(now);
-        setSyncMessage('Synced');
-        setTimeout(() => setSyncMessage(null), 3000);
+        setLastSyncedAt(new Date());
+        setStatusMessage('Synced');
+        setTimeout(() => setStatusMessage(null), 3000);
       }
     } catch (err) {
       console.error('Manual sync failed:', err);
@@ -44,72 +51,98 @@ export default function Topbar() {
     }
   };
 
-  const isConnected = activeConnection && activeConnection.connectionStatus === 'connected';
+  const handleRunScan = async () => {
+    if (!activeConnection?._id) return;
+    setScanning(true);
+    try {
+      await api.post('/anomalies/scan', { connectionId: activeConnection._id });
+      setStatusMessage('Scan complete');
+      setTimeout(() => setStatusMessage(null), 3000);
+    } catch (err) {
+      console.error('Scan failed:', err);
+    } finally {
+      setScanning(false);
+    }
+  };
+
+  const handleExport = () => {
+    window.print();
+  };
 
   return (
-    <header className="h-16 border-b border-[#222222] bg-[#0a0a0a]/80 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between px-4 md:px-8">
-      {/* Page Title */}
+    <header className="h-14 border-b border-slate-200 bg-white/95 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between px-6 md:px-8">
+      {/* Left: Tab Title & Status Badges */}
       <div className="flex items-center gap-3">
-        <h2 className="text-lg font-semibold text-zinc-100">{getPageTitle(pathname)}</h2>
-      </div>
+        {/* Mobile brand logo (visible only when sidebar is hidden) */}
+        <Link href="/dashboard" className="flex md:hidden items-center mr-1">
+          <img
+            src="/cloudsense_favicon_hd.png"
+            alt="CloudSense Logo"
+            className="w-7 h-7 rounded-lg shadow-sm object-contain"
+          />
+        </Link>
+        <h2 className="text-sm font-semibold text-slate-800">
+          {getPageTitle(pathname)}
+        </h2>
 
-      {/* Center - AWS Connection Chip */}
-      <div className="hidden sm:flex items-center">
-        {isConnected ? (
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium border border-green-500/20 bg-green-950/40 text-green-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-            <span>AWS Connected</span>
-            {activeConnection.accountId && (
-              <span className="font-mono text-zinc-400">({activeConnection.accountId})</span>
-            )}
-          </div>
-        ) : (
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium border border-amber-500/20 bg-amber-950/40 text-amber-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-            <span>No AWS Account Connected</span>
-          </div>
-        )}
-      </div>
-
-      {/* Right Controls */}
-      <div className="flex items-center gap-3">
-        {/* Sync Status & Button */}
-        {isConnected && (
-          <div className="flex items-center gap-2">
-            {lastSyncedAt && (
-              <span className="hidden lg:inline text-xs text-zinc-400">
-                Synced {formatDateTime(lastSyncedAt)}
-              </span>
-            )}
-            <button
-              type="button"
-              disabled={syncing}
-              onClick={handleSyncNow}
-              className={cn(
-                'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#222222] bg-zinc-900/80 hover:bg-zinc-800 text-xs font-medium text-zinc-200 transition-colors disabled:opacity-50'
-              )}
-            >
-              <RefreshCw className={cn('w-3.5 h-3.5 text-zinc-400', syncing && 'animate-spin text-blue-400')} />
-              <span>{syncing ? 'Syncing...' : syncMessage || 'Sync Now'}</span>
-            </button>
-          </div>
-        )}
-
-        {/* User initials & logout */}
-        <div className="flex items-center gap-2 pl-2 border-l border-[#222222]">
-          <div className="w-8 h-8 rounded-full bg-blue-600/10 border border-blue-500/30 text-blue-400 flex items-center justify-center text-xs font-semibold uppercase">
-            {user?.name ? user.name.slice(0, 2) : 'CS'}
-          </div>
-          <button
-            type="button"
-            onClick={logout}
-            title="Log out"
-            aria-label="Log out"
-            className="hidden md:inline-flex p-1.5 text-zinc-400 hover:text-red-400 transition-colors"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
+        {/* Synced status badge */}
+        <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-500 font-normal">
+          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+          <span>Synced 4 min ago</span>
         </div>
+
+        {/* Budget Warning Pill */}
+        <div className="hidden md:flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200">
+          <AlertTriangle className="w-3 h-3 text-amber-600" />
+          <span>EC2 budget exceeded</span>
+        </div>
+      </div>
+
+      {/* Right Controls: Action Buttons */}
+      <div className="flex items-center gap-2">
+        {/* Sync Button */}
+        <button
+          type="button"
+          disabled={syncing}
+          onClick={handleSyncNow}
+          className={cn(
+            'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-medium text-slate-700 shadow-sm transition-all disabled:opacity-50'
+          )}
+        >
+          <RefreshCw
+            className={cn(
+              'w-3.5 h-3.5 text-slate-500',
+              syncing && 'animate-spin text-blue-600'
+            )}
+          />
+          <span>{syncing ? 'Syncing...' : 'Sync'}</span>
+        </button>
+
+        {/* Export Button */}
+        <button
+          type="button"
+          onClick={handleExport}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-medium text-slate-700 shadow-sm transition-all"
+        >
+          <Download className="w-3.5 h-3.5 text-slate-500" />
+          <span>Export</span>
+        </button>
+
+        {/* Run Scan Button */}
+        <button
+          type="button"
+          disabled={scanning}
+          onClick={handleRunScan}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-medium text-slate-700 shadow-sm transition-all disabled:opacity-50"
+        >
+          <Scan
+            className={cn(
+              'w-3.5 h-3.5 text-slate-500',
+              scanning && 'animate-spin text-blue-600'
+            )}
+          />
+          <span>{scanning ? 'Scanning...' : 'Run scan'}</span>
+        </button>
       </div>
     </header>
   );

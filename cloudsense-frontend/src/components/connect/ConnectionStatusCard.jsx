@@ -56,33 +56,33 @@ export default function ConnectionStatusCard({ connection, onRefresh }) {
   };
 
   return (
-    <div className="rounded-xl border border-[#222222] bg-[#111111] p-6 space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#222222]">
+    <div className="rounded-xl border border-slate-200 bg-white p-6 space-y-6 shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-center text-green-400">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600">
             <Shield className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-base font-semibold text-zinc-100">
+              <h3 className="text-base font-semibold text-slate-900">
                 AWS Account {connection.accountId || 'Connected'}
               </h3>
               <span
                 className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border ${
                   isConnected
-                    ? 'border-green-500/30 bg-green-950/40 text-green-400'
-                    : 'border-red-500/30 bg-red-950/40 text-red-400'
+                    ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                    : 'border-red-200 bg-red-50 text-red-600'
                 }`}
               >
                 <span
                   className={`w-1.5 h-1.5 rounded-full ${
-                    isConnected ? 'bg-green-400' : 'bg-red-400'
+                    isConnected ? 'bg-emerald-500' : 'bg-red-500'
                   }`}
                 />
                 {isConnected ? 'Connected' : 'Connection Error'}
               </span>
             </div>
-            <p className="text-xs text-zinc-400 mt-0.5 font-mono truncate max-w-md">
+            <p className="text-xs text-slate-500 mt-0.5 font-mono truncate max-w-md">
               Role: {connection.roleArn}
             </p>
           </div>
@@ -91,7 +91,7 @@ export default function ConnectionStatusCard({ connection, onRefresh }) {
         <button
           type="button"
           onClick={() => router.push('/dashboard')}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-colors"
         >
           <span>Go to Dashboard</span>
           <ArrowRight className="w-4 h-4" />
@@ -99,23 +99,23 @@ export default function ConnectionStatusCard({ connection, onRefresh }) {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-3 rounded-lg border border-[#222222] bg-[#1a1a1a]/50">
-          <p className="text-xs text-zinc-400">AWS Region</p>
-          <p className="text-sm font-semibold text-zinc-200 mt-1 font-mono">
+        <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60 shadow-sm">
+          <p className="text-xs text-slate-500">AWS Region</p>
+          <p className="text-sm font-semibold text-slate-800 mt-1 font-mono">
             {connection.region || 'us-east-1'}
           </p>
         </div>
 
-        <div className="p-3 rounded-lg border border-[#222222] bg-[#1a1a1a]/50">
-          <p className="text-xs text-zinc-400">Last Synced</p>
-          <p className="text-sm font-semibold text-zinc-200 mt-1">
+        <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60 shadow-sm">
+          <p className="text-xs text-slate-500">Last Synced</p>
+          <p className="text-sm font-semibold text-slate-800 mt-1">
             {connection.lastSyncedAt ? formatDateTime(connection.lastSyncedAt) : 'Never'}
           </p>
         </div>
 
-        <div className="p-3 rounded-lg border border-[#222222] bg-[#1a1a1a]/50">
-          <p className="text-xs text-zinc-400">External ID</p>
-          <p className="text-sm font-semibold text-zinc-200 mt-1 font-mono truncate">
+        <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60 shadow-sm">
+          <p className="text-xs text-slate-500">External ID</p>
+          <p className="text-sm font-semibold text-slate-800 mt-1 font-mono truncate">
             {connection.externalId}
           </p>
         </div>
@@ -125,14 +125,14 @@ export default function ConnectionStatusCard({ connection, onRefresh }) {
         <div
           className={`p-3 rounded-lg border text-xs flex items-center gap-2 ${
             testResult.success
-              ? 'border-green-500/30 bg-green-950/30 text-green-300'
-              : 'border-red-500/30 bg-red-950/30 text-red-300'
+              ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+              : 'border-red-200 bg-red-50 text-red-700'
           }`}
         >
           {testResult.success ? (
-            <CheckCircle2 className="w-4 h-4 text-green-400 shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
           ) : (
-            <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+            <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
           )}
           <span>{testResult.message}</span>
         </div>
@@ -143,16 +143,16 @@ export default function ConnectionStatusCard({ connection, onRefresh }) {
           type="button"
           disabled={testing}
           onClick={handleTestConnection}
-          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border border-[#222222] bg-zinc-900 hover:bg-zinc-800 text-xs font-medium text-zinc-200 transition-colors disabled:opacity-50"
+          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-medium text-slate-700 shadow-sm transition-colors disabled:opacity-50"
         >
-          <RefreshCw className={`w-3.5 h-3.5 ${testing ? 'animate-spin text-blue-400' : ''}`} />
+          <RefreshCw className={`w-3.5 h-3.5 ${testing ? 'animate-spin text-blue-600' : 'text-slate-500'}`} />
           <span>{testing ? 'Testing AssumeRole...' : 'Test Connection'}</span>
         </button>
 
         <button
           type="button"
           onClick={() => setShowDisconnectModal(true)}
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-red-400 hover:text-red-300 hover:bg-red-950/20 transition-colors"
+          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
         >
           <Trash2 className="w-3.5 h-3.5" />
           <span>Disconnect Account</span>

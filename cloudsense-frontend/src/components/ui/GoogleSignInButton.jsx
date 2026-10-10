@@ -64,7 +64,7 @@ export default function GoogleSignInButton({ onSuccess, onError }) {
 
       window.google.accounts.id.renderButton(buttonRef.current, {
         type: 'standard',
-        theme: 'filled_black',
+        theme: 'outline',
         size: 'large',
         width: buttonRef.current.offsetWidth,
         text: 'continue_with',
@@ -86,7 +86,7 @@ export default function GoogleSignInButton({ onSuccess, onError }) {
       <button
         type="button"
         disabled
-        className="w-full py-2.5 px-4 rounded-lg border border-[#222222] bg-[#111111] text-zinc-500 text-sm text-center cursor-not-allowed"
+        className="w-full py-2.5 px-4 rounded-lg border border-slate-200 bg-slate-50 text-slate-400 text-xs text-center cursor-not-allowed"
       >
         Google Sign-In unavailable
       </button>
@@ -96,15 +96,15 @@ export default function GoogleSignInButton({ onSuccess, onError }) {
   return (
     <div className="w-full">
       {!scriptLoaded && (
-        <div className="w-full py-2.5 px-4 rounded-lg border border-[#222222] bg-[#111111] flex items-center justify-center gap-2 text-sm text-zinc-400">
+        <div className="w-full py-2.5 px-4 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-center gap-2 text-xs text-slate-400">
           <Loader2 className="w-4 h-4 animate-spin" />
           <span>Loading Google Sign-In...</span>
         </div>
       )}
       <div
         ref={buttonRef}
-        className={`w-full ${scriptLoaded ? '' : 'h-0 overflow-hidden'}`}
-        style={{ colorScheme: 'auto' }}
+        className={`w-full flex justify-center ${scriptLoaded ? '' : 'h-0 overflow-hidden'}`}
+        style={{ colorScheme: 'light' }}
       />
     </div>
   );

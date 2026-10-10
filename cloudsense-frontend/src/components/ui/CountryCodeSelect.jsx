@@ -193,29 +193,29 @@ export default function CountryCodeSelect({ value, onChange }) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1.5 h-full px-3 py-2.5 rounded-l-lg border border-[#222222] bg-[#111111] hover:bg-[#191919] text-sm text-zinc-100 transition-colors focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 border-r-0"
+        className="flex items-center gap-1.5 h-full px-3 py-2.5 rounded-l-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs text-slate-900 transition-colors focus:outline-none focus:border-blue-600 border-r-0 shadow-sm"
       >
         <span className="text-base leading-none">{selected.flag}</span>
-        <span className="text-zinc-400 text-xs font-medium">{selected.dial}</span>
+        <span className="text-slate-500 text-xs font-medium">{selected.dial}</span>
         <ChevronDown
-          className={`w-3 h-3 text-zinc-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          className={`w-3 h-3 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
         />
       </button>
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute z-50 top-full left-0 mt-1.5 w-72 max-h-72 rounded-xl border border-[#222222] bg-[#111111] shadow-2xl shadow-black/50 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150">
+        <div className="absolute z-50 top-full left-0 mt-1.5 w-72 max-h-72 rounded-xl border border-slate-200 bg-white shadow-xl shadow-slate-200/50 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150">
           {/* Search bar */}
-          <div className="p-2 border-b border-[#222222]">
+          <div className="p-2 border-b border-slate-100 bg-slate-50">
             <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
               <input
                 ref={searchInputRef}
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search country or code..."
-                className="w-full pl-8 pr-3 py-2 rounded-lg bg-[#0a0a0a] border border-[#222222] text-xs text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-blue-500/50 transition-colors"
+                className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 transition-colors"
               />
             </div>
           </div>
@@ -223,7 +223,7 @@ export default function CountryCodeSelect({ value, onChange }) {
           {/* Country list */}
           <div ref={listRef} className="overflow-y-auto max-h-52 overscroll-contain">
             {filtered.length === 0 ? (
-              <div className="px-4 py-6 text-center text-xs text-zinc-500">No countries found</div>
+              <div className="px-4 py-6 text-center text-xs text-slate-400">No countries found</div>
             ) : (
               filtered.map((country) => (
                 <button
@@ -231,15 +231,15 @@ export default function CountryCodeSelect({ value, onChange }) {
                   type="button"
                   data-code={country.code}
                   onClick={() => handleSelect(country)}
-                  className={`w-full flex items-center gap-3 px-3 py-2 text-left transition-colors hover:bg-blue-500/10 ${
+                  className={`w-full flex items-center gap-3 px-3 py-2 text-left transition-colors hover:bg-blue-50 ${
                     selected.code === country.code
-                      ? 'bg-blue-500/10 text-blue-400'
-                      : 'text-zinc-300'
+                      ? 'bg-blue-50 text-blue-600 font-semibold'
+                      : 'text-slate-700'
                   }`}
                 >
                   <span className="text-base leading-none shrink-0">{country.flag}</span>
                   <span className="text-xs font-medium truncate flex-1">{country.name}</span>
-                  <span className="text-[11px] text-zinc-500 font-mono shrink-0">{country.dial}</span>
+                  <span className="text-[11px] text-slate-400 font-mono shrink-0">{country.dial}</span>
                 </button>
               ))
             )}

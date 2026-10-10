@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { KeyRound, Shield, Check, Loader2, ArrowRight, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { KeyRound, Shield, Check, Loader2, ArrowRight, CheckCircle2 } from 'lucide-react';
 import api from '../../lib/api';
 import { useAppStore } from '../../store/useAppStore';
 import CopyButton from '../ui/CopyButton';
@@ -73,7 +73,7 @@ export default function ConnectionStepWizard({ onConnected }) {
       if (res.success && res.data?.connection) {
         setActiveConnection(res.data.connection);
         setConnectedAccount(res.data.connection);
-        setCurrentStep(4); // Success step
+        setCurrentStep(4);
         if (onConnected) onConnected(res.data.connection);
       } else {
         throw new Error(res.message || 'Failed to connect');
@@ -89,22 +89,22 @@ export default function ConnectionStepWizard({ onConnected }) {
   };
 
   return (
-    <div className="rounded-xl border border-[#222222] bg-[#111111] p-6 md:p-8 space-y-8">
+    <div className="rounded-xl border border-slate-200 bg-white p-6 md:p-8 space-y-8 shadow-sm">
       {/* Wizard Header & Progress Tabs */}
       <div className="space-y-4">
         <div>
-          <h2 className="text-xl font-bold tracking-tight text-zinc-100">
+          <h2 className="text-xl font-bold tracking-tight text-slate-900">
             Connect your AWS Account
           </h2>
-          <p className="text-sm text-zinc-400 mt-1">
+          <p className="text-xs text-slate-500 mt-1">
             We use IAM Roles — we never store your AWS credentials.
           </p>
         </div>
 
         {/* Security Info Box */}
-        <div className="p-4 rounded-lg border border-blue-500/20 bg-blue-950/20 flex items-start gap-3 text-sm text-zinc-300">
-          <Shield className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
-          <p className="text-xs text-blue-200/90 leading-relaxed">
+        <div className="p-4 rounded-xl border border-blue-200 bg-blue-50/60 flex items-start gap-3 text-xs text-slate-700 shadow-sm">
+          <Shield className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+          <p className="leading-relaxed">
             CloudSense assumes a role in your account using AWS STS. We only require read access for cost
             and resource telemetry. Your primary credentials never leave AWS.
           </p>
@@ -124,19 +124,19 @@ export default function ConnectionStepWizard({ onConnected }) {
                 key={s.num}
                 className={`flex items-center gap-2 p-2.5 rounded-lg border text-xs font-medium transition-all ${
                   isCompleted
-                    ? 'border-green-500/30 bg-green-950/20 text-green-300'
+                    ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
                     : isCurrent
-                    ? 'border-blue-500/40 bg-blue-950/30 text-blue-200'
-                    : 'border-[#222222] bg-zinc-900/40 text-zinc-500'
+                    ? 'border-blue-300 bg-blue-50 text-blue-900'
+                    : 'border-slate-200 bg-slate-50 text-slate-400'
                 }`}
               >
                 <div
                   className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
                     isCompleted
-                      ? 'bg-green-500 text-black'
+                      ? 'bg-emerald-600 text-white'
                       : isCurrent
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-zinc-800 text-zinc-400'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-slate-200 text-slate-500'
                   }`}
                 >
                   {isCompleted ? <Check className="w-3 h-3 stroke-[3]" /> : s.num}
@@ -153,28 +153,28 @@ export default function ConnectionStepWizard({ onConnected }) {
       {/* Step 1: Generate External ID */}
       {currentStep === 1 && (
         <div className="space-y-6 pt-2">
-          <div className="space-y-3">
-            <h3 className="text-base font-semibold text-zinc-100 flex items-center gap-2">
-              <KeyRound className="w-4 h-4 text-blue-400" />
+          <div className="space-y-2">
+            <h3 className="text-base font-semibold text-slate-900 flex items-center gap-2">
+              <KeyRound className="w-4 h-4 text-blue-600" />
               <span>Step 1: Generate External ID</span>
             </h3>
-            <p className="text-sm text-zinc-400 leading-relaxed">
+            <p className="text-xs text-slate-500 leading-relaxed">
               An External ID acts as a secret passphrase between your AWS account and CloudSense to
               prevent the Confused Deputy vulnerability.
             </p>
           </div>
 
           {externalId ? (
-            <div className="p-4 rounded-lg border border-[#222222] bg-[#0c0c0c] flex items-center justify-between gap-3">
-              <span className="font-mono text-sm text-zinc-200">{externalId}</span>
+            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between gap-3 shadow-sm">
+              <span className="font-mono text-sm text-slate-800">{externalId}</span>
               <div className="flex items-center gap-2">
                 <CopyButton text={externalId} />
                 <button
                   type="button"
                   onClick={() => setCurrentStep(2)}
-                  className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium transition-colors"
+                  className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-colors"
                 >
-                  Continue to Step 2 →
+                  Continue to Step 2 &rarr;
                 </button>
               </div>
             </div>
@@ -183,7 +183,7 @@ export default function ConnectionStepWizard({ onConnected }) {
               type="button"
               disabled={generatingId}
               onClick={handleGenerateId}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white text-sm font-semibold transition-colors disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-semibold shadow-sm transition-colors disabled:opacity-50"
             >
               {generatingId && <Loader2 className="w-4 h-4 animate-spin" />}
               <span>Generate External ID</span>
@@ -195,37 +195,37 @@ export default function ConnectionStepWizard({ onConnected }) {
       {/* Step 2: IAM Instruction Panel */}
       {currentStep === 2 && (
         <div className="space-y-6">
-          <div className="flex items-center justify-between pb-3 border-b border-[#222222]">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <div>
-              <h3 className="text-base font-semibold text-zinc-100">
+              <h3 className="text-base font-semibold text-slate-900">
                 Step 2: Create IAM Role in AWS
               </h3>
-              <p className="text-xs text-zinc-400 mt-0.5">
+              <p className="text-xs text-slate-500 mt-0.5">
                 Use this unique External ID in your Trust Policy:
               </p>
             </div>
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[#222222] bg-[#0c0c0c]">
-              <span className="font-mono text-xs text-zinc-300">{externalId}</span>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 shadow-sm">
+              <span className="font-mono text-xs text-slate-800">{externalId}</span>
               <CopyButton text={externalId} />
             </div>
           </div>
 
           <IAMInstructionPanel externalId={externalId} />
 
-          <div className="flex items-center justify-between pt-4 border-t border-[#222222]">
+          <div className="flex items-center justify-between pt-4 border-t border-slate-100">
             <button
               type="button"
               onClick={() => setCurrentStep(1)}
-              className="px-4 py-2 rounded-lg border border-[#222222] bg-zinc-900 text-zinc-300 text-xs font-medium hover:bg-zinc-800 transition-colors"
+              className="px-4 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 text-xs font-medium hover:bg-slate-50 transition-colors shadow-sm"
             >
-              ← Back
+              &larr; Back
             </button>
             <button
               type="button"
               onClick={() => setCurrentStep(3)}
-              className="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold transition-colors"
+              className="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-colors"
             >
-              <span>I have created the role. Continue →</span>
+              <span>I have created the role. Continue &rarr;</span>
             </button>
           </div>
         </div>
@@ -234,18 +234,18 @@ export default function ConnectionStepWizard({ onConnected }) {
       {/* Step 3: Enter Role ARN & Connect */}
       {currentStep === 3 && (
         <form onSubmit={handleConnect} className="space-y-6">
-          <div className="space-y-2">
-            <h3 className="text-base font-semibold text-zinc-100">
+          <div className="space-y-1">
+            <h3 className="text-base font-semibold text-slate-900">
               Step 3: Enter Role ARN and Connect
             </h3>
-            <p className="text-xs text-zinc-400">
+            <p className="text-xs text-slate-500">
               Paste the ARN from the role you just created in the AWS IAM Console.
             </p>
           </div>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-zinc-300 mb-1.5">
+              <label className="block text-xs font-medium text-slate-700 mb-1.5">
                 IAM Role ARN
               </label>
               <input
@@ -253,21 +253,21 @@ export default function ConnectionStepWizard({ onConnected }) {
                 placeholder="arn:aws:iam::123456789012:role/CloudSenseRole"
                 value={roleArn}
                 onChange={(e) => setRoleArn(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-lg border border-[#222222] bg-[#0c0c0c] text-zinc-100 font-mono text-sm placeholder:text-zinc-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-900 font-mono text-xs placeholder:text-slate-400 focus:outline-none focus:border-blue-600 shadow-sm transition-colors"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-zinc-300 mb-1.5">
+              <label className="block text-xs font-medium text-slate-700 mb-1.5">
                 Primary AWS Region
               </label>
               <select
                 value={region}
                 onChange={(e) => setRegion(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-lg border border-[#222222] bg-[#0c0c0c] text-zinc-100 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-800 text-xs focus:outline-none focus:border-blue-600 shadow-sm transition-colors"
               >
                 {AWS_REGIONS.map((r) => (
-                  <option key={r.code} value={r.code} className="bg-zinc-900 text-zinc-200">
+                  <option key={r.code} value={r.code}>
                     {r.code} — {r.name}
                   </option>
                 ))}
@@ -275,21 +275,21 @@ export default function ConnectionStepWizard({ onConnected }) {
             </div>
           </div>
 
-          <div className="flex items-center justify-between pt-4 border-t border-[#222222]">
+          <div className="flex items-center justify-between pt-4 border-t border-slate-100">
             <button
               type="button"
               disabled={connecting}
               onClick={() => setCurrentStep(2)}
-              className="px-4 py-2 rounded-lg border border-[#222222] bg-zinc-900 text-zinc-300 text-xs font-medium hover:bg-zinc-800 transition-colors"
+              className="px-4 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 text-xs font-medium hover:bg-slate-50 transition-colors shadow-sm"
             >
-              ← Back to instructions
+              &larr; Back to instructions
             </button>
             <button
               type="submit"
               disabled={connecting}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white text-sm font-semibold transition-colors disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-semibold shadow-sm transition-colors disabled:opacity-50"
             >
-              {connecting && <Loader2 className="w-4 h-4 animate-spin" />}
+              {connecting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
               <span>{connecting ? 'Verifying connection with AWS...' : 'Verify & Connect'}</span>
             </button>
           </div>
@@ -298,13 +298,13 @@ export default function ConnectionStepWizard({ onConnected }) {
 
       {/* Step 4: Success View */}
       {currentStep === 4 && connectedAccount && (
-        <div className="p-8 rounded-xl border border-green-500/30 bg-green-950/20 text-center space-y-4">
-          <div className="w-14 h-14 rounded-full bg-green-500/20 border border-green-500/40 flex items-center justify-center text-green-400 mx-auto">
+        <div className="p-8 rounded-xl border border-emerald-200 bg-emerald-50/60 text-center space-y-4 shadow-sm">
+          <div className="w-14 h-14 rounded-full bg-emerald-100 border border-emerald-200 flex items-center justify-center text-emerald-600 mx-auto">
             <CheckCircle2 className="w-8 h-8" />
           </div>
           <div className="space-y-1">
-            <h3 className="text-xl font-bold text-zinc-100">AWS Connection Verified!</h3>
-            <p className="text-sm text-zinc-300">
+            <h3 className="text-xl font-bold text-slate-900">AWS Connection Verified!</h3>
+            <p className="text-xs text-slate-600">
               Account <span className="font-mono font-semibold">{connectedAccount.accountId}</span> is
               now connected and ready for monitoring.
             </p>
@@ -313,7 +313,7 @@ export default function ConnectionStepWizard({ onConnected }) {
             <button
               type="button"
               onClick={() => router.push('/dashboard')}
-              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-colors"
             >
               <span>Go to Dashboard</span>
               <ArrowRight className="w-4 h-4" />

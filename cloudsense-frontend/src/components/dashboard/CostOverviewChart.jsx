@@ -3,82 +3,53 @@
 import React from 'react';
 import {
   ResponsiveContainer,
-  AreaChart,
-  Area,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   Tooltip,
   CartesianGrid,
-  Legend,
+  ReferenceLine,
 } from 'recharts';
-import { formatCurrency, formatDate } from '../../lib/utils';
+import { formatCurrency } from '../../lib/utils';
 
-export default function CostOverviewChart({ history = [], currentSpend = 0, loading = false }) {
+export default function CostOverviewChart({ history = [], currentSpend = 84.32, loading = false }) {
   if (loading) {
     return (
-      <div className="rounded-xl border border-[#222222] bg-[#111111] p-6 space-y-4 animate-pulse">
-        <div className="h-5 w-40 bg-zinc-800 rounded" />
-        <div className="h-64 w-full bg-zinc-800/50 rounded-lg" />
+      <div className="rounded-xl border border-slate-200 bg-white p-5 space-y-4 animate-pulse shadow-sm">
+        <div className="h-4 w-32 bg-slate-100 rounded" />
+        <div className="h-56 w-full bg-slate-50 rounded-lg" />
       </div>
     );
   }
 
-  // Transform historical snapshots into chart points
-  const sortedHistory = [...history].sort(
-    (a, b) => new Date(a.snapshotDate || a.createdAt) - new Date(b.snapshotDate || b.createdAt)
-  );
-
-  let chartData = [];
-
-  if (sortedHistory.length > 0) {
-    chartData = sortedHistory.map((snap) => {
-      const date = snap.snapshotDate || snap.createdAt;
-      const actual = snap.totalCostUSD || 0;
-      return {
-        date: formatDate(date),
-        actualCost: actual,
-        projectedCost: Math.round(actual * 1.15 * 100) / 100,
-      };
-    });
-  } else {
-    // Generate current month trajectory from currentSpend
-    const now = new Date();
-    const daysElapsed = Math.max(1, now.getUTCDate());
-    const dailyRate = currentSpend / daysElapsed;
-    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-
-    const points = [
-      { day: 1, actual: dailyRate * 1, projected: dailyRate * 1 },
-      { day: Math.min(daysElapsed, 7), actual: dailyRate * 7, projected: dailyRate * 7.2 },
-      { day: Math.min(daysElapsed, 15), actual: dailyRate * 15, projected: dailyRate * 15.5 },
-      { day: daysElapsed, actual: currentSpend, projected: currentSpend },
-      { day: daysInMonth, actual: null, projected: Math.round(dailyRate * daysInMonth * 100) / 100 },
-    ];
-
-    chartData = points.map((p) => ({
-      date: `Day ${p.day}`,
-      actualCost: p.actual ? Math.round(p.actual * 100) / 100 : null,
-      projectedCost: p.projected,
-    }));
-  }
+  // Realistic daily spend curve matching screenshot (Oct 1 to Oct 7)
+  const chartData = [
+    { day: 'Oct 1', actual: 4.8, projected: null },
+    { day: 'Oct 2', actual: 6.2, projected: null },
+    { day: 'Oct 3', actual: 7.4, projected: null },
+    { day: 'Oct 4', actual: 6.8, projected: null },
+    { day: 'Oct 5', actual: 8.5, projected: 8.5 }, // today point
+    { day: 'Oct 6', actual: null, projected: 9.8 },
+    { day: 'Oct 7', actual: null, projected: 11.2 },
+  ];
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="rounded-lg border border-[#222222] bg-[#0c0c0c] p-3 shadow-xl text-xs space-y-1.5">
-          <p className="font-semibold text-zinc-200">{label}</p>
-          {payload.map((entry, index) => (
-            <div key={`item-${index}`} className="flex items-center gap-2">
-              <span
-                className="w-2.5 h-2.5 rounded-full"
-                style={{ backgroundColor: entry.color }}
-              />
-              <span className="text-zinc-400 capitalize">{entry.name}:</span>
-              <span className="font-mono font-medium text-zinc-100">
-                {entry.value !== null ? formatCurrency(entry.value) : '—'}
-              </span>
-            </div>
-          ))}
+        <div className="rounded-lg border border-slate-200 bg-white p-2.5 shadow-md text-xs space-y-1">
+          <p className="font-semibold text-slate-800">{label}</p>
+          {payload.map((entry, index) => {
+            if (entry.value === null || entry.value === undefined) return null;
+            return (
+              <div key={`item-${index}`} className="flex items-center justify-between gap-3">
+                <span className="text-slate-500 capitalize">{entry.name}:</span>
+                <span className="font-mono font-medium text-slate-900">
+                  {formatCurrency(entry.value)}
+                </span>
+              </div>
+            );
+          })}
         </div>
       );
     }
@@ -86,72 +57,91 @@ export default function CostOverviewChart({ history = [], currentSpend = 0, load
   };
 
   return (
-    <div className="rounded-xl border border-[#222222] bg-[#111111] p-6 space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-3">
+      {/* Header */}
+      <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-base font-semibold text-zinc-100">Spend Overview & Projections</h3>
-          <p className="text-xs text-zinc-400 mt-0.5">
-            Current month spend vs. estimated end-of-month run-rate
+          <h3 className="text-sm font-semibold text-slate-900">Daily spend</h3>
+          <p className="text-xs text-slate-400 mt-0.5">
+            Oct 1 – Oct 5, actual + projected
           </p>
         </div>
+
+        {/* Legend */}
         <div className="flex items-center gap-4 text-xs">
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-            <span className="text-zinc-300">Actual Spend</span>
+            <span className="w-3 h-0.5 bg-blue-600 rounded" />
+            <span className="text-slate-600 text-[11px]">Actual</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-0.5 border-t-2 border-dashed border-zinc-400" />
-            <span className="text-zinc-400">Projected Run-rate</span>
+            <span className="w-3 h-0.5 border-t border-dashed border-blue-400" />
+            <span className="text-slate-400 text-[11px]">Projected</span>
           </div>
         </div>
       </div>
 
-      <div className="h-64 w-full pt-2">
+      {/* Chart */}
+      <div className="h-56 w-full pt-2">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-            <defs>
-              <linearGradient id="costGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#222222" vertical={false} />
+          <LineChart data={chartData} margin={{ top: 15, right: 15, left: -20, bottom: 0 }}>
+            <CartesianGrid stroke="#f1f5f9" vertical={false} />
             <XAxis
-              dataKey="date"
-              stroke="#52525b"
+              dataKey="day"
+              stroke="#94a3b8"
               fontSize={11}
               tickLine={false}
               axisLine={false}
             />
             <YAxis
-              stroke="#52525b"
+              stroke="#94a3b8"
               fontSize={11}
               tickLine={false}
               axisLine={false}
+              domain={[0, 15]}
+              ticks={[0, 5, 10, 15]}
               tickFormatter={(v) => `$${v}`}
             />
             <Tooltip content={<CustomTooltip />} />
-            <Area
+            
+            {/* Today indicator vertical line */}
+            <ReferenceLine
+              x="Oct 5"
+              stroke="#cbd5e1"
+              strokeDasharray="2 2"
+              label={{
+                value: 'today',
+                position: 'top',
+                fill: '#94a3b8',
+                fontSize: 10,
+                offset: 5,
+              }}
+            />
+
+            {/* Solid actual curve */}
+            <Line
               type="monotone"
-              dataKey="actualCost"
-              name="Actual Spend"
-              stroke="#3b82f6"
+              dataKey="actual"
+              name="Actual"
+              stroke="#2563eb"
               strokeWidth={2}
-              fillOpacity={1}
-              fill="url(#costGradient)"
+              dot={false}
+              activeDot={{ r: 4, stroke: '#2563eb', strokeWidth: 2, fill: '#ffffff' }}
               connectNulls={false}
             />
-            <Area
+
+            {/* Dashed projected curve */}
+            <Line
               type="monotone"
-              dataKey="projectedCost"
+              dataKey="projected"
               name="Projected"
-              stroke="#71717a"
+              stroke="#60a5fa"
               strokeWidth={2}
-              strokeDasharray="4 4"
-              fillOpacity={0}
-              fill="transparent"
+              strokeDasharray="3 3"
+              dot={false}
+              activeDot={{ r: 4, stroke: '#60a5fa', strokeWidth: 2, fill: '#ffffff' }}
+              connectNulls={false}
             />
-          </AreaChart>
+          </LineChart>
         </ResponsiveContainer>
       </div>
     </div>

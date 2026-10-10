@@ -1,11 +1,9 @@
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
-  AlertTriangle,
   RefreshCw,
-  ShieldCheck,
   AlertCircle,
   ArrowRight,
   ShieldAlert,
@@ -68,16 +66,16 @@ export default function AnomaliesPage() {
   if (!activeConnection) {
     return (
       <div className="max-w-4xl mx-auto py-12 text-center space-y-4">
-        <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mx-auto">
+        <div className="w-12 h-12 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 mx-auto">
           <AlertCircle className="w-6 h-6" />
         </div>
-        <h3 className="text-lg font-bold text-zinc-100">No AWS Account Connected</h3>
-        <p className="text-sm text-zinc-400 max-w-sm mx-auto">
+        <h3 className="text-lg font-bold text-slate-900">No AWS Account Connected</h3>
+        <p className="text-xs text-slate-500 max-w-sm mx-auto">
           Connect your AWS account via STS AssumeRole to initiate automated cost anomaly scans.
         </p>
         <Link
           href="/connect"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold transition-colors"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-colors"
         >
           <span>Connect AWS Account</span>
           <ArrowRight className="w-4 h-4" />
@@ -86,7 +84,6 @@ export default function AnomaliesPage() {
     );
   }
 
-  // Count severities across loaded anomalies
   const severityCounts = {
     critical: anomalies.filter((a) => a.severity === 'critical').length,
     high: anomalies.filter((a) => a.severity === 'high').length,
@@ -104,12 +101,12 @@ export default function AnomaliesPage() {
             type="button"
             disabled={scanning}
             onClick={handleRunScan}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-xs font-semibold text-white transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-xs font-semibold text-white shadow-sm transition-colors disabled:opacity-50"
           >
             {scanning ? (
               <>
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                <span>Scanning your AWS account...</span>
+                <span>Scanning AWS account...</span>
               </>
             ) : (
               <>
@@ -124,8 +121,8 @@ export default function AnomaliesPage() {
       {error && <ErrorBanner message={error} onRetry={loadAnomalies} />}
 
       {scanResultToast && (
-        <div className="p-3 rounded-lg border border-blue-500/30 bg-blue-950/30 text-blue-300 text-xs flex items-center gap-2">
-          <ShieldAlert className="w-4 h-4 text-blue-400 shrink-0" />
+        <div className="p-3 rounded-lg border border-blue-200 bg-blue-50 text-blue-800 text-xs flex items-center gap-2 shadow-sm">
+          <ShieldAlert className="w-4 h-4 text-blue-600 shrink-0" />
           <span>{scanResultToast}</span>
         </div>
       )}
@@ -139,28 +136,16 @@ export default function AnomaliesPage() {
         severityCounts={severityCounts}
       />
 
-      {/* Anomalies List */}
-      {loading ? (
-        <LoadingSpinner size="lg" text="Analyzing anomaly patterns..." className="py-16" />
+      {/* Anomaly Cards List */}
+      {loading && anomalies.length === 0 ? (
+        <LoadingSpinner size="lg" text="Scanning telemetry for anomalies..." className="py-16" />
       ) : anomalies.length === 0 ? (
         <EmptyState
-          icon={ShieldCheck}
-          title="No open anomalies detected"
-          subtitle="Your AWS account looks healthy. None of the 10 cost leak patterns were triggered."
-          action={
-            <button
-              type="button"
-              disabled={scanning}
-              onClick={handleRunScan}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[#222222] bg-zinc-900 hover:bg-zinc-800 text-xs font-medium text-zinc-200 transition-colors"
-            >
-              <RefreshCw className="w-3.5 h-3.5" />
-              <span>Run a new scan</span>
-            </button>
-          }
+          title="No anomalies found for selected filters"
+          subtitle="Your cloud infrastructure is within expected bounds or all current findings have been marked resolved."
         />
       ) : (
-        <div className="grid grid-cols-1 gap-4">
+        <div className="space-y-4">
           {anomalies.map((item) => (
             <AnomalyCard
               key={item._id}
@@ -172,10 +157,10 @@ export default function AnomaliesPage() {
         </div>
       )}
 
-      {/* Slide-over Detail Modal */}
+      {/* Slide-out details modal */}
       <AnomalyDetailModal
-        anomaly={activeAnomalyModal}
         open={Boolean(activeAnomalyModal)}
+        anomaly={activeAnomalyModal}
         onClose={() => setActiveAnomalyModal(null)}
         onStatusChange={handleStatusChange}
       />
