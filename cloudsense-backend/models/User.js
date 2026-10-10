@@ -17,14 +17,21 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, 'Password is required'],
       minlength: [8, 'Password must be at least 8 characters'],
       select: false,
     },
     phone: {
       type: String,
-      required: [true, 'Phone number is required'],
       trim: true,
+    },
+    googleId: {
+      type: String,
+      sparse: true,
+    },
+    authProvider: {
+      type: String,
+      enum: ['local', 'google'],
+      default: 'local',
     },
     isVerified: {
       type: Boolean,
@@ -35,6 +42,7 @@ const userSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
 
 userSchema.index({ email: 1 }, { unique: true });
 

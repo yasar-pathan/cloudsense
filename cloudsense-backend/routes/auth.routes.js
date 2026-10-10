@@ -17,6 +17,9 @@ router.post(
   asyncHandler(authController.login)
 );
 
+router.post('/google', asyncHandler(authController.googleLogin));
+
 router.get('/me', authMiddleware, asyncHandler(authController.getMe));
 
 module.exports = router;
+

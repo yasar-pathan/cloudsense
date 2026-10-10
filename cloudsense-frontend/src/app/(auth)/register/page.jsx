@@ -2,20 +2,25 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Eye, EyeOff, Cloud, ShieldCheck, Zap, PhoneCall, Loader2 } from 'lucide-react';
 import { useAuth } from '../../../hooks/useAuth';
 import ErrorBanner from '../../../components/ui/ErrorBanner';
+import CountryCodeSelect, { COUNTRIES } from '../../../components/ui/CountryCodeSelect';
+import GoogleSignInButton from '../../../components/ui/GoogleSignInButton';
 
 const registerSchema = z
   .object({
     name: z.string().min(2, 'Full name must be at least 2 characters'),
     email: z.string().email('Please enter a valid email address'),
-    phone: z
+    countryCode: z.string().min(1, 'Please select a country'),
+    localPhone: z
       .string()
-      .regex(/^\+[1-9]\d{6,14}$/, 'Phone must be in international format (e.g. +14155552671, +919876543210)'),
+      .min(4, 'Phone number is too short')
+      .max(15, 'Phone number is too long')
+      .regex(/^\d+$/, 'Phone number must contain only digits'),
     password: z
       .string()
       .min(8, 'Password must be at least 8 characters')
@@ -30,19 +35,32 @@ const registerSchema = z
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const { register: registerUser, loading } = useAuth();
+  const { register: registerUser, googleLogin, loading } = useAuth();
   const [submitError, setSubmitError] = useState(null);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  const handleGoogleSuccess = async (credential) => {
+    setSubmitError(null);
+    setGoogleLoading(true);
+    const result = await googleLogin(credential);
+    if (!result.success) {
+      setSubmitError(result.error);
+    }
+    setGoogleLoading(false);
+  };
 
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       name: '',
       email: '',
-      phone: '',
+      countryCode: 'US',
+      localPhone: '',
       password: '',
       confirmPassword: '',
     },
@@ -50,10 +68,12 @@ export default function RegisterPage() {
 
   const onSubmit = async (data) => {
     setSubmitError(null);
+    const country = COUNTRIES.find((c) => c.code === data.countryCode);
+    const fullPhone = `${country.dial}${data.localPhone}`;
     const result = await registerUser({
       name: data.name,
       email: data.email,
-      phone: data.phone,
+      phone: fullPhone,
       password: data.password,
     });
     if (!result.success) {
@@ -188,17 +208,32 @@ export default function RegisterPage() {
               <label className="block text-xs font-medium text-zinc-300 mb-1.5">
                 Phone Number
               </label>
-              <input
-                type="tel"
-                placeholder="+14155552671"
-                {...register('phone')}
-                className="w-full px-3.5 py-2.5 rounded-lg border border-[#222222] bg-[#111111] text-zinc-100 text-sm placeholder:text-zinc-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
-              />
+              <div className="flex">
+                <Controller
+                  name="countryCode"
+                  control={control}
+                  render={({ field }) => (
+                    <CountryCodeSelect
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  )}
+                />
+                <input
+                  type="tel"
+                  placeholder="4155552671"
+                  {...register('localPhone')}
+                  className="flex-1 min-w-0 px-3.5 py-2.5 rounded-r-lg border border-[#222222] bg-[#111111] text-zinc-100 text-sm placeholder:text-zinc-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                />
+              </div>
               <p className="text-[11px] text-zinc-400 mt-1">
-                Used for AWS alert phone calls only. International format required (+...).
+                Used for AWS alert phone calls only. Select your country code above.
               </p>
-              {errors.phone && (
-                <p className="text-xs text-red-400 mt-1">{errors.phone.message}</p>
+              {errors.countryCode && (
+                <p className="text-xs text-red-400 mt-1">{errors.countryCode.message}</p>
+              )}
+              {errors.localPhone && (
+                <p className="text-xs text-red-400 mt-1">{errors.localPhone.message}</p>
               )}
             </div>
 
@@ -250,6 +285,29 @@ export default function RegisterPage() {
               <span>{loading ? 'Creating account...' : 'Create your account'}</span>
             </button>
           </form>
+
+          {/* Divider */}
+          <div className="relative flex items-center gap-4 py-1">
+            <div className="flex-1 h-px bg-[#222222]"></div>
+            <span className="text-[11px] text-zinc-500 uppercase tracking-wider font-medium">or</span>
+            <div className="flex-1 h-px bg-[#222222]"></div>
+          </div>
+
+          {/* Google Sign-In */}
+          <div className="relative">
+            {googleLoading && (
+              <div className="absolute inset-0 bg-[#0a0a0a]/60 rounded-lg flex items-center justify-center z-10">
+                <div className="flex items-center gap-2 text-xs text-zinc-400">
+                  <div className="w-4 h-4 border-2 border-zinc-600 border-t-blue-500 rounded-full animate-spin"></div>
+                  Creating account...
+                </div>
+              </div>
+            )}
+            <GoogleSignInButton
+              onSuccess={handleGoogleSuccess}
+              onError={(msg) => setSubmitError(msg)}
+            />
+          </div>
 
           <div className="pt-4 border-t border-[#222222] text-center">
             <p className="text-xs text-zinc-400">
