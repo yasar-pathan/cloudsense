@@ -3,7 +3,8 @@ const { validationResult, body } = require('express-validator');
 const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
 
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const googleClientId = process.env.GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+const googleClient = new OAuth2Client(googleClientId);
 
 const generateToken = (userId) => {
   return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
@@ -98,11 +99,18 @@ const googleLogin = async (req, res) => {
     return res.status(400).json({ success: false, message: 'Google credential is required' });
   }
 
+  if (!googleClientId) {
+    return res.status(500).json({
+      success: false,
+      message: 'Google OAuth Client ID is not configured on the server',
+    });
+  }
+
   let payload;
   try {
     const ticket = await googleClient.verifyIdToken({
       idToken: credential,
-      audience: process.env.GOOGLE_CLIENT_ID,
+      audience: googleClientId,
     });
     payload = ticket.getPayload();
   } catch (err) {
