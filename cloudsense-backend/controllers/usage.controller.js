@@ -29,7 +29,7 @@ const saveUsageSnapshot = async (connection, awsData) => {
 };
 
 /**
- * Get current month usage (fetch + save)
+ * Get current month usage (fast DB read with fallback)
  */
 const getCurrentUsage = async (req, res) => {
   const { connectionId } = req.query;
@@ -48,8 +48,28 @@ const getCurrentUsage = async (req, res) => {
     return res.status(404).json({ success: false, message: 'Connection not found' });
   }
 
-  const awsData = await awsFetcher.fetchAllAwsData(connection);
-  const snapshot = await saveUsageSnapshot(connection, awsData);
+  // Fast path: return latest usage snapshot from database
+  let snapshot = await UsageSnapshot.findOne({
+    awsConnectionId: connectionId,
+  }).sort({ snapshotDate: -1 });
+
+  // Only perform live AWS fetch if no snapshot exists in DB yet
+  if (!snapshot) {
+    try {
+      const awsData = await awsFetcher.fetchAllAwsData(connection);
+      snapshot = await saveUsageSnapshot(connection, awsData);
+    } catch (err) {
+      // Fallback: return empty snapshot structure if AWS fetch fails
+      return res.json({
+        success: true,
+        data: {
+          totalCostUSD: 0,
+          serviceCosts: [],
+          snapshotDate: new Date(),
+        },
+      });
+    }
+  }
 
   res.json({ success: true, data: snapshot });
 };
@@ -86,7 +106,7 @@ const getUsageHistory = async (req, res) => {
 };
 
 /**
- * Get current month cost by service
+ * Get current month cost by service (fast DB read with fallback)
  */
 const getServicesBreakdown = async (req, res) => {
   const { connectionId } = req.query;
@@ -105,22 +125,47 @@ const getServicesBreakdown = async (req, res) => {
     return res.status(404).json({ success: false, message: 'Connection not found' });
   }
 
-  const credentials = await awsFetcher.assumeRole(
-    connection.roleArn,
-    connection.externalId,
-    connection.region
-  );
-  const costByService = await awsFetcher.getCostByService(credentials, connection.region);
-  const totalCost = costByService.reduce((sum, s) => sum + s.costUSD, 0);
+  // Fast path: use latest snapshot's serviceCosts from MongoDB (instant response)
+  const latestSnapshot = await UsageSnapshot.findOne({
+    awsConnectionId: connectionId,
+  }).sort({ snapshotDate: -1 });
 
-  const breakdown = costByService.map((s) => ({
-    service: s.service,
-    serviceName: s.serviceName,
-    costUSD: s.costUSD,
-    percentage: totalCost > 0 ? roundUSD((s.costUSD / totalCost) * 100) : 0,
-  }));
+  if (latestSnapshot && Array.isArray(latestSnapshot.serviceCosts) && latestSnapshot.serviceCosts.length > 0) {
+    const totalCost =
+      latestSnapshot.totalCostUSD ||
+      latestSnapshot.serviceCosts.reduce((sum, s) => sum + (s.costUSD || 0), 0);
 
-  res.json({ success: true, data: breakdown });
+    const breakdown = latestSnapshot.serviceCosts.map((s) => ({
+      service: s.service,
+      serviceName: s.serviceName || s.service,
+      costUSD: s.costUSD,
+      percentage: totalCost > 0 ? roundUSD((s.costUSD / totalCost) * 100) : 0,
+    }));
+
+    return res.json({ success: true, data: breakdown });
+  }
+
+  // Fallback: If no snapshot exists yet, fetch live from AWS
+  try {
+    const credentials = await awsFetcher.assumeRole(
+      connection.roleArn,
+      connection.externalId,
+      connection.region
+    );
+    const costByService = await awsFetcher.getCostByService(credentials, connection.region);
+    const totalCost = costByService.reduce((sum, s) => sum + s.costUSD, 0);
+
+    const breakdown = costByService.map((s) => ({
+      service: s.service,
+      serviceName: s.serviceName,
+      costUSD: s.costUSD,
+      percentage: totalCost > 0 ? roundUSD((s.costUSD / totalCost) * 100) : 0,
+    }));
+
+    return res.json({ success: true, data: breakdown });
+  } catch (err) {
+    return res.json({ success: true, data: [] });
+  }
 };
 
 /**

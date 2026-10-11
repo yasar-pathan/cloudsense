@@ -14,7 +14,13 @@ export default function DashboardLayout({ children }) {
   const router = useRouter();
   const { isAuthenticated, getMe } = useAuth();
   const { activeConnection, setActiveConnection, setConnections } = useAppStore();
-  const [checkingAuth, setCheckingAuth] = useState(true);
+  const [checkingAuth, setCheckingAuth] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('cs_token');
+      return !token;
+    }
+    return false;
+  });
 
   useEffect(() => {
     let isMounted = true;
@@ -25,8 +31,9 @@ export default function DashboardLayout({ children }) {
         return;
       }
 
+      if (isMounted) setCheckingAuth(false);
+
       try {
-        await getMe();
         if (!activeConnection) {
           const res = await api.get('/aws/connections');
           if (isMounted && res.success && Array.isArray(res.data)) {
@@ -38,8 +45,6 @@ export default function DashboardLayout({ children }) {
         }
       } catch (err) {
         console.error('Failed to initialize dashboard session:', err);
-      } finally {
-        if (isMounted) setCheckingAuth(false);
       }
     }
 
@@ -47,7 +52,7 @@ export default function DashboardLayout({ children }) {
     return () => {
       isMounted = false;
     };
-  }, [isAuthenticated, router]);
+  }, []);
 
   if (checkingAuth) {
     return (

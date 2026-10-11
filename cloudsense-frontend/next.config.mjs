@@ -1,24 +1,22 @@
 import { withSentryConfig } from "@sentry/nextjs/config";
 
+const isProd = process.env.NODE_ENV === "production";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false,
+  experimental: {
+    optimizePackageImports: ["lucide-react", "recharts", "date-fns"],
+  },
 };
 
-export default withSentryConfig(nextConfig, {
-  // Sentry organization & project slugs
-  org: process.env.SENTRY_ORG || "yasar-pathan",
-  project: process.env.SENTRY_PROJECT || "javascript-nextjs",
-
-  // Only print logs for uploading source maps in CI
-  silent: !process.env.CI,
-
-  // Upload a larger set of source maps for prettier stack traces
-  widenClientFileUpload: true,
-
-  // Route browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers
-  tunnelRoute: "/monitoring",
-
-  // Automatically tree-shake Sentry logger statements to reduce bundle size
-  disableLogger: true,
-});
+export default isProd
+  ? withSentryConfig(nextConfig, {
+      org: process.env.SENTRY_ORG || "yasar-pathan",
+      project: process.env.SENTRY_PROJECT || "javascript-nextjs",
+      silent: !process.env.CI,
+      widenClientFileUpload: true,
+      tunnelRoute: "/monitoring",
+      disableLogger: true,
+    })
+  : nextConfig;

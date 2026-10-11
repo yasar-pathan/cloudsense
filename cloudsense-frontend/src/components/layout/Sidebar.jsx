@@ -25,8 +25,13 @@ export default function Sidebar() {
   const { logout, user } = useAuth();
   const { activeConnection } = useAppStore();
 
+  const [mounted, setMounted] = useState(false);
   const [openAnomalyCount, setOpenAnomalyCount] = useState(3);
   const [unackAlertCount, setUnackAlertCount] = useState(1);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -100,7 +105,7 @@ export default function Sidebar() {
     ? `..${activeConnection.accountId.slice(-4)}`
     : '..7261';
 
-  const userInitials = user?.name
+  const userInitials = mounted && user?.name
     ? user.name
         .split(' ')
         .map((n) => n[0])
@@ -148,6 +153,7 @@ export default function Sidebar() {
                   <Link
                     key={item.label}
                     href={item.href}
+                    prefetch={true}
                     className={cn(
                       'flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors group',
                       isActive
@@ -197,8 +203,8 @@ export default function Sidebar() {
               {isConnected ? 'Connected' : 'Connected'}
             </span>
           </div>
-          <span className="text-[11px] font-mono text-emerald-700">
-            {accountIdSnippet}
+          <span suppressHydrationWarning className="text-[11px] font-mono text-emerald-700">
+            {mounted ? accountIdSnippet : '..7261'}
           </span>
         </Link>
       </div>
@@ -207,14 +213,14 @@ export default function Sidebar() {
       <div className="p-3 border-t border-slate-100 flex items-center justify-between gap-2 bg-slate-50/50">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="w-8 h-8 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center text-xs font-bold text-blue-700 uppercase shrink-0">
-            {userInitials}
+            <span suppressHydrationWarning>{userInitials}</span>
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-semibold text-slate-800 truncate">
-              {user?.name || 'Yasar Pathan'}
+            <p suppressHydrationWarning className="text-xs font-semibold text-slate-800 truncate">
+              {mounted && user?.name ? user.name : 'Yasar Pathan'}
             </p>
-            <p className="text-[11px] text-slate-400 truncate">
-              {user?.email || 'yasar@cloudsense.io'}
+            <p suppressHydrationWarning className="text-[11px] text-slate-400 truncate">
+              {mounted && user?.email ? user.email : 'yasar@cloudsense.io'}
             </p>
           </div>
         </div>
