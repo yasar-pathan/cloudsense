@@ -37,14 +37,27 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    resetPasswordToken: {
+      type: String,
+      select: false,
+    },
+    resetPasswordExpire: {
+      type: Date,
+      select: false,
+    },
+    resetPasswordOtp: {
+      type: String,
+      select: false,
+    },
+    resetPasswordOtpExpire: {
+      type: Date,
+      select: false,
+    },
   },
   {
     timestamps: true,
   }
 );
-
-
-userSchema.index({ email: 1 }, { unique: true });
 
 userSchema.pre('save', async function hashPassword(next) {
   if (!this.isModified('password')) return next();
@@ -56,10 +69,43 @@ userSchema.methods.comparePassword = async function comparePassword(candidatePas
   return bcrypt.compare(candidatePassword, this.password);
 };
 
+userSchema.methods.getResetPasswordToken = function getResetPasswordToken() {
+  const crypto = require('crypto');
+  const resetToken = crypto.randomBytes(32).toString('hex');
+
+  this.resetPasswordToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+
+  this.resetPasswordExpire = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+  return resetToken;
+};
+
+userSchema.methods.getResetPasswordOtp = function getResetPasswordOtp() {
+  const crypto = require('crypto');
+  const otp = crypto.randomInt(100000, 1000000).toString();
+
+  this.resetPasswordOtp = crypto
+    .createHash('sha256')
+    .update(otp)
+    .digest('hex');
+
+  this.resetPasswordOtpExpire = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+  return otp;
+};
+
 userSchema.methods.toJSON = function toJSON() {
   const obj = this.toObject();
   delete obj.password;
+  delete obj.resetPasswordToken;
+  delete obj.resetPasswordExpire;
+  delete obj.resetPasswordOtp;
+  delete obj.resetPasswordOtpExpire;
   return obj;
 };
 
 module.exports = mongoose.model('User', userSchema);
+

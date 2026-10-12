@@ -102,6 +102,92 @@ export function useAuth() {
     return Boolean(currentToken && isTokenValid(currentToken));
   }, [token]);
 
+  const forgotPassword = async (email) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await api.post('/auth/forgot-password', { email });
+      if (res.success) {
+        return {
+          success: true,
+          message: res.message,
+          devOtp: res.devOtp,
+          devResetUrl: res.devResetUrl,
+        };
+      }
+      throw new Error(res.message || 'Failed to process request');
+    } catch (err) {
+      const msg = err.response?.data?.message || err.message || 'Failed to process password reset';
+      setError(msg);
+      return { success: false, error: msg };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifyOtp = async (email, otp) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await api.post('/auth/verify-otp', { email, otp });
+      if (res.success) {
+        return {
+          success: true,
+          message: res.message,
+          resetToken: res.data?.resetToken,
+          email: res.data?.email,
+        };
+      }
+      throw new Error(res.message || 'Verification failed');
+    } catch (err) {
+      const msg = err.response?.data?.message || err.message || 'Invalid or expired verification code';
+      setError(msg);
+      return { success: false, error: msg };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifyResetToken = async (token) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await api.get(`/auth/reset-password/${token}`);
+      if (res.success) {
+        return { success: true, email: res.data?.email };
+      }
+      throw new Error(res.message || 'Invalid or expired token');
+    } catch (err) {
+      const msg = err.response?.data?.message || err.message || 'Invalid or expired token';
+      setError(msg);
+      return { success: false, error: msg };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resetPassword = async (payloadOrToken, password) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const body =
+        typeof payloadOrToken === 'object'
+          ? payloadOrToken
+          : { token: payloadOrToken, password };
+      const res = await api.post('/auth/reset-password', body);
+      if (res.success) {
+        return { success: true, message: res.message, data: res.data };
+      }
+      throw new Error(res.message || 'Failed to reset password');
+    } catch (err) {
+      const msg = err.response?.data?.message || err.message || 'Failed to reset password';
+      setError(msg);
+      return { success: false, error: msg };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     user,
     token,
@@ -113,5 +199,10 @@ export function useAuth() {
     logout,
     getMe,
     isAuthenticated,
+    forgotPassword,
+    verifyOtp,
+    verifyResetToken,
+    resetPassword,
   };
 }
+
